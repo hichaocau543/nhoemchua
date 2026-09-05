@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhớ Em Chưa</title>
+    <link rel="stylesheet" href="./style.css?v=6">
+</head>
+<body>
+
+    <div class="app">
+
+        <!-- Thanh trên cùng -->
+        <header class="top-bar">
+            <div>
+                <p class="hello">Xin chào 👋</p>
+                <h1>Nhớ Em Chưa</h1>
+            </div>
+            <div class="moon">🌙</div>
+        </header> 
+
+        <!-- NỘI DUNG CHÍNH -->
+        <main id="app-content">
+
+            <!-- HOME SCREEN -->
+            <section id="home-screen" class="screen active">
+
+                <div class="date-header">
+                    <div>
+                        <p>Hôm nay</p>
+                        <h2 id="home-date-display">Thứ Hai, 05/09</h2>
+                    </div>
+                </div>
+
+                <!-- CÂU NÓI ĐỘNG LỰC -->
+                <div class="quote-card">
+                    <span class="quote-icon">💬</span>
+                    <p id="home-quote-text">"Học, học nữa, học mãi!"</p>
+                    <button id="btn-refresh-quote" title="Đổi câu nói ngẫu nhiên">🔄</button>
+                </div>
+
+                <!-- THỜI KHÓA BIỂU -->
+                <div class="weekly-header">
+                    <div class="section-title">
+                        <div>
+                            <p class="small-title">THỜI KHÓA BIỂU</p>
+                            <h2>Bảng thời khóa biểu</h2>
+                        </div>
+                        <button class="add-btn">+</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="weekly-timetable">
+                        <thead>
+                            <tr>
+                                <th>Tiết / Giờ</th>
+                                <th>Thứ 2</th>
+                                <th>Thứ 3</th>
+                                <th>Thứ 4</th>
+                                <th>Thứ 5</th>
+                                <th>Thứ 6</th>
+                                <th>Thứ 7</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weekly-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- LỊCH HỌC THÊM -->
+                <div class="weekly-header" style="margin-top: 25px;">
+                    <div class="section-title">
+                        <div>
+                            <p class="small-title">HỌC THÊM</p>
+                            <h2>Lịch học thêm</h2>
+                        </div>
+                        <button class="add-btn" id="btn-add-extra-class">+</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="weekly-timetable">
+                        <thead>
+                            <tr>
+                                <th>Thứ</th>
+                                <th>Giờ</th>
+                                <th>Môn</th>
+                                <th>Ghi chú</th>
+                                <th>Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="extra-class-tbody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tiến độ nhanh -->
+                <div class="quick-progress">
+                    <div class="card">
+                        <p>Hôm nay</p>
+                        <strong id="home-today-percent">0%</strong>
+                        <span id="home-today-count">0 / 0 việc</span>
+                    </div>
+                    <div class="card">
+                        <p>Tuần này</p>
+                        <strong id="home-week-percent">0%</strong>
+                        <span>Tiến độ học tập</span>
+                    </div>
+                </div>
+
+                <!-- CÁC KỲ THI SẮP TỚI TẠI HOME -->
+                <div class="section-title" style="margin-top: 10px;">
+                    <div>
+                        <p class="small-title">KỲ THI SẮP TỚI</p>
+                        <h2>Đếm ngược kỳ thi</h2>
+                    </div>
+                </div>
+                <div id="home-exams-container" class="exams-grid"></div>
+
+            </section>
+
+            <!-- CÔNG VIỆC -->
+            <section id="tasks-screen" class="screen">
+                <div class="page-title">
+                    <p>CÔNG VIỆC</p>
+                    <h2>Việc cần làm</h2>
+                </div>
+
+                <div class="task-date">
+                    <button id="task-prev-day">‹</button>
+                    <strong id="task-date-display">Thứ Hai, 05/09</strong>
+                    <button id="task-next-day">›</button>
+                </div>
+
+                <div id="task-list" class="task-list"></div>
+
+                <button class="big-add-btn" id="btn-add-task">
+                    ＋ Thêm công việc
+                </button>
+            </section>
+
+            <!-- THỐNG KÊ -->
+            <section id="stats-screen" class="screen">
+                <div class="page-title">
+                    <p>THỐNG KÊ</p>
+                    <h2>Tiến độ của bạn</h2>
+                </div>
+
+                <div class="stats-tabs">
+                    <button class="stats-tab active" data-range="day">Ngày</button>
+                    <button class="stats-tab" data-range="week">Tuần</button>
+                    <button class="stats-tab" data-range="month">Tháng</button>
+                </div>
+
+                <div class="big-progress">
+                    <div class="progress-circle">
+                        <strong id="stats-percent">0%</strong>
+                    </div>
+                    <p id="stats-detail-text">Hoàn thành 0 / 0 công việc</p>
+                </div>
+            </section>
+
+            <!-- KỲ THI -->
+            <section id="exam-screen" class="screen">
+                <div class="page-title">
+                    <p>KỲ THI</p>
+                    <h2>Quản lý kỳ thi</h2>
+                </div>
+
+                <div id="exam-tabs-container"></div>
+
+                <div class="exam-box">
+                    <div class="exam-icon">🎯</div>
+                    <h2 id="exam-display-title">ĐGNL</h2>
+                    <p id="exam-display-date">Ngày thi: 26/12/2026</p>
+
+                    <div class="exam-days">
+                        <strong id="exam-display-days">0</strong>
+                        <span>ngày còn lại</span>
+                    </div>
+
+                    <div class="exam-actions">
+                        <button id="btn-edit-exam">✏️ Sửa kỳ thi</button>
+                        <button id="btn-delete-exam" class="delete-btn">🗑️ Xóa</button>
+                        <button id="btn-add-exam" class="primary-btn">＋ Thêm mới</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CÀI ĐẶT -->
+            <section id="settings-screen" class="screen">
+                <div class="page-title">
+                    <p>CÀI ĐẶT</p>
+                    <h2>Cài đặt ứng dụng</h2>
+                </div>
+
+                <div class="setting-group">
+                    <h3>💬 Quản lý câu nói động lực</h3>
+                    <p class="setting-desc">App sẽ chọn ngẫu nhiên một câu nói trong danh sách này mỗi lần hiển thị hoặc thông báo.</p>
+
+                    <div class="add-quote-row">
+                        <input type="text" id="input-new-quote" placeholder="Nhập câu nói động lực mới...">
+                        <button id="btn-add-quote">Thêm</button>
+                    </div>
+
+                    <div id="quotes-list" class="quotes-list"></div>
+
+                    <button id="btn-enable-notify" class="secondary-btn" style="width: 100%; margin-top: 15px;">
+                        🔔 Bật / Thử thông báo ngẫu nhiên
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- THANH ĐIỀU HƯỚNG -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="home-screen">
+                <span>🏠</span>
+                <small>Home</small>
+            </button>
+            <button class="nav-item" data-screen="tasks-screen">
+                <span>✅</span>
+                <small>Công việc</small>
+            </button>
+            <button class="nav-item" data-screen="stats-screen">
+                <span>📊</span>
+                <small>Thống kê</small>
+            </button>
+            <button class="nav-item" data-screen="exam-screen">
+                <span>🎯</span>
+                <small>Kỳ thi</small>
+            </button>
+            <button class="nav-item" data-screen="settings-screen">
+                <span>⚙️</span>
+                <small>Cài đặt</small>
+            </button>
+        </nav>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
