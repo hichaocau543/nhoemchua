@@ -150,7 +150,7 @@ if (btnEnableNotify) {
 }
 
 // ================================
-// QUẢN LÝ CÔNG VIỆC (TASKS)
+// QUẢN LÝ CÔNG VIỆC (TASKS) & MỤC CHƯA HOÀN THÀNH
 // ================================
 
 const taskDateDisplay = document.getElementById("task-date-display");
@@ -167,50 +167,114 @@ function renderTasks() {
     if (!taskListContainer) return;
 
     const dateKey = formatDateKey(taskSelectedDate);
-    const dayTasks = tasks[dateKey] || [];
+    if (!tasks[dateKey]) {
+        tasks[dateKey] = [];
+    }
 
-    if (dayTasks.length === 0) {
-        taskListContainer.innerHTML = `
+    const dayTasks = tasks[dateKey];
+
+    // Thu thập các việc chưa hoàn thành từ các ngày trước đó trong tuần
+    let overdueTasks = [];
+    const jsDay = taskSelectedDate.getDay(); 
+    const currentDayIndex = jsDay === 0 ? 7 : jsDay; // Chủ Nhật tính là 7
+
+    for (let i = 1; i < currentDayIndex; i++) {
+        const d = new Date(taskSelectedDate);
+        d.setDate(taskSelectedDate.getDate() - (currentDayIndex - i));
+        const prevKey = formatDateKey(d);
+        
+        if (tasks[prevKey]) {
+            tasks[prevKey].forEach((t, pIndex) => {
+                if (!t.completed) {
+                    overdueTasks.push({ ...t, originalDateKey: prevKey, originalIndex: pIndex });
+                }
+            });
+        }
+    }
+
+    let htmlContent = "";
+
+    // 1. Hiển thị khu vực "VIỆC CHƯA HOÀN THÀNH" (Tồn đọng)
+    if (overdueTasks.length > 0) {
+        htmlContent += `
+            <div class="overdue-section" style="margin-bottom: 20px; padding: 12px; background: rgba(255, 107, 107, 0.08); border-left: 4px solid #ff6b6b; border-radius: 6px;">
+                <h4 style="color: #ff6b6b; margin-bottom: 10px; font-size: 14px;">⚠️ Việc chưa hoàn thành từ ngày trước:</h4>
+        `;
+        overdueTasks.forEach((task) => {
+            htmlContent += `
+                <div class="task-item overdue-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="task-item-left" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" class="task-checkbox overdue-checkbox" data-date="${task.originalDateKey}" data-index="${task.originalIndex}">
+                        <span class="task-text">${task.text} <small style="color: var(--text-light);">(Ngày ${task.originalDateKey})</small></span>
+                    </div>
+                </div>
+            `;
+        });
+        htmlContent += `</div>`;
+    }
+
+    // 2. Hiển thị công việc của ngày hiện tại
+    if (dayTasks.length === 0 && overdueTasks.length === 0) {
+        htmlContent += `
             <div class="empty-task">
                 <div>📝</div>
                 <h3>Chưa có công việc</h3>
-                <p>Thêm việc cần làm cho ngày này nhé!</p>
+                <p>Thêm việc cần làm hoặc cài đặt sẵn vào Chủ Nhật nhé!</p>
             </div>
         `;
     } else {
-        taskListContainer.innerHTML = "";
+        htmlContent += `<h4 style="margin-bottom: 10px; font-size: 14px;">📋 Việc trong ngày:</h4>`;
         dayTasks.forEach((task, index) => {
-            const item = document.createElement("div");
-            item.className = `task-item ${task.completed ? "completed" : ""}`;
-            
-            item.innerHTML = `
-                <div class="task-item-left">
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? "checked" : ""}>
-                    <span class="task-text">${task.text}</span>
+            htmlContent += `
+                <div class="task-item ${task.completed ? "completed" : ""}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="task-item-left" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" class="task-checkbox day-checkbox" data-index="${index}" ${task.completed ? "checked" : ""}>
+                        <span class="task-text">${task.text}</span>
+                    </div>
+                    <button class="delete-task-btn" data-index="${index}" style="background: none; border: none; cursor: pointer;">🗑️</button>
                 </div>
-                <button class="delete-task-btn">🗑️</button>
             `;
-
-            const checkbox = item.querySelector(".task-checkbox");
-            checkbox.addEventListener("change", () => {
-                dayTasks[index].completed = checkbox.checked;
-                saveTasks();
-                renderTasks();
-                renderStats();
-            });
-
-            const deleteBtn = item.querySelector(".delete-task-btn");
-            deleteBtn.addEventListener("click", () => {
-                dayTasks.splice(index, 1);
-                if (dayTasks.length === 0) delete tasks[dateKey];
-                saveTasks();
-                renderTasks();
-                renderStats();
-            });
-
-            taskListContainer.appendChild(item);
         });
     }
+
+    taskListContainer.innerHTML = htmlContent;
+
+    // Lắng nghe sự kiện checkbox ngày hiện tại
+    taskListContainer.querySelectorAll(".day-checkbox").forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const idx = e.target.dataset.index;
+            dayTasks[idx].completed = e.target.checked;
+            saveTasks();
+            renderTasks();
+            renderStats();
+        });
+    });
+
+    // Lắng nghe sự kiện checkbox việc tồn đọng
+    taskListContainer.querySelectorAll(".overdue-checkbox").forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const oDate = e.target.dataset.date;
+            const oIdx = e.target.dataset.index;
+            if (tasks[oDate] && tasks[oDate][oIdx]) {
+                tasks[oDate][oIdx].completed = e.target.checked;
+                saveTasks();
+                renderTasks();
+                renderStats();
+            }
+        });
+    });
+
+    // Lắng nghe sự kiện xóa task
+    taskListContainer.querySelectorAll(".delete-task-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const idx = e.target.dataset.index;
+            dayTasks.splice(idx, 1);
+            if (dayTasks.length === 0) delete tasks[dateKey];
+            saveTasks();
+            renderTasks();
+            renderStats();
+        });
+    });
 }
 
 function saveTasks() {
@@ -279,7 +343,8 @@ function getTaskStatsForRange(range) {
     } else if (range === 'week') {
         const day = today.getDay();
         const diffToMonday = today.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(today.setDate(diffToMonday));
+        const monday = new Date(today);
+        monday.setDate(diffToMonday);
 
         for (let i = 0; i < 7; i++) {
             const d = new Date(monday);
@@ -550,7 +615,6 @@ function saveSchedule() {
 
 const addScheduleButtons = document.querySelectorAll(".add-btn");
 addScheduleButtons.forEach((btn) => {
-    // Chỉ bắt sự kiện cho nút thêm TKB chính, không bắt nhầm nút học thêm
     if (btn.id === "btn-add-extra-class") return;
     
     btn.addEventListener("click", () => {
